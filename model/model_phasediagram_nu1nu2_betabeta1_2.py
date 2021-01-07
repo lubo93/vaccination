@@ -31,8 +31,8 @@ rcParams.update({'figure.figsize': fig_size})
 ### prime/boost protocols
 # simulation parameters/initial conditions
 
-beta1dbeta_arr = np.linspace(1e-3, 1, 30)
-nu1dnu2_arr = np.linspace(1e-4, 0.999, 30)
+beta1dbeta_arr = np.linspace(1e-3, 1, 10)
+nu1dnu2_arr = np.linspace(1e-4, 0.999, 10)
 
 f_arr = []
 F_arr = []
@@ -44,15 +44,20 @@ nu = 5*1e-3
 
 for (pref,nu_pref) in zip(np.ravel(BETA1dBETA), np.ravel(NU1dNU2)):
     
+    # simulation parameters/initial conditions
+    # [beta, betap, betapp, beta_1, beta_1p, beta_1pp, \
+    # beta_2, beta_2p, beta_2pp, nu_1, nu_2, eta_1, eta_2, \
+    # gamma, gammap, gammapp, sigma, sigma_1, sigma_2, IFR, IFR1, IFR2]
     params1 = [beta, beta/10, beta/20, pref*beta, pref*beta/10, pref*beta/20, \
     0.05*pref*beta, 0.05*pref*beta/10, 0.05*pref*beta/20, nu, 0, \
-    1e-3, 1e-3, 1/14, 1/7, 1/3, 1e-2, 1e-3, 1e-4]
+    1e-3, 1e-3, 1/6, 1/3, 1/2, 1/5, 1/2, 1/2, 1e-2, 1e-3, 1e-4]
     
     params2 = [beta, beta/10, beta/20, pref*beta, pref*beta/10, pref*beta/20, \
     0.05*pref*beta, 0.05*pref*beta/10, 0.05*pref*beta/20, nu*nu_pref, nu*(1-nu_pref), \
-    1e-3, 1e-3, 1/14, 1/7, 1/3, 1e-2, 1e-3, 1e-4]
+    1e-3, 1e-3, 1/6, 1/3, 1/2, 1/5, 1/2, 1/2, 1e-2, 1e-3, 1e-4]
     
-    initial_conditions = [0.99, 0, 0, 0.01, 0, 0, 0, 0]
+    # [S0, S0p, S0pp, E0, E0p, E0pp, I0, I0p, I0pp, R0, D0]
+    initial_conditions = [0.99, 0, 0, 0, 0, 0, 0.01, 0, 0, 0, 0]
     
     model1 = epidemic_model(params1, initial_conditions)
     model1.simulate()
@@ -123,7 +128,13 @@ print("F", F)
 f = f < 0
 F = F < 0
 
-cmap = colors.ListedColormap(['#b7241b','#265500'])
+f = np.ma.masked_where(f == False, f)
+F = np.ma.masked_where(F == False, F)
+
+# set color for which f,F < 0 is True
+cmap = colors.ListedColormap(['#b7241b'])
+# set color for which f,F > 0 is False
+cmap.set_bad(color='#265500')
 
 fig, ax = plt.subplots(ncols = 2)
 
