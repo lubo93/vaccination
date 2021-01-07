@@ -31,7 +31,7 @@ rcParams.update({'figure.figsize': fig_size})
 ### prime/boost protocols
 # simulation parameters/initial conditions
 
-beta_arr = np.linspace(1/14, 0.3, 30)
+beta_arr = np.linspace(1/6, 0.7, 30)
 nu_max_arr = np.linspace(0, 1e-3, 30)
 
 f_arr = []
@@ -42,16 +42,21 @@ R_0_arr = []
 BETA, NU_MAX = np.meshgrid(beta_arr,nu_max_arr)
 
 for (beta,nu_max) in zip(np.ravel(BETA),np.ravel(NU_MAX)):
-    
+        
+    # simulation parameters/initial conditions
+    # [beta, betap, betapp, beta_1, beta_1p, beta_1pp, \
+    # beta_2, beta_2p, beta_2pp, nu_1, nu_2, eta_1, eta_2, \
+    # gamma, gammap, gammapp, sigma, sigma_1, sigma_2, IFR, IFR1, IFR2]
     params1 = [beta, beta/10, beta/20, 0.8*beta, 0.8*beta/10, 0.8*beta/20, \
     0.1*beta, 0.1*beta/10, 0.1*beta/20, nu_max, 0, \
-    1e-3, 1e-3, 1/14, 1/14, 1/14, 1e-2, 1e-2, 1e-2]
+    1e-3, 1e-3, 1/6, 1/6, 1/6, 1/7, 1/7, 1/7, 1e-2, 1e-2, 1e-2]
     
     params2 = [beta, beta/10, beta/20, 0.8*beta, 0.8*beta/10, 0.8*beta/20, \
     0.1*beta, 0.1*beta/10, 0.1*beta/20, nu_max/2, nu_max/2, \
-    1e-3, 1e-3, 1/14, 1/14, 1/14, 1e-2, 1e-2, 1e-2]
+    1e-3, 1e-3, 1/6, 1/6, 1/6, 1/7, 1/7, 1/7, 1e-2, 1e-2, 1e-2]
     
-    initial_conditions = [0.99, 0, 0, 0.01, 0, 0, 0, 0]
+    # [S0, S0p, S0pp, E0, E0p, E0pp, I0, I0p, I0pp, R0, D0]
+    initial_conditions = [0.99, 0, 0, 0, 0, 0, 0.01, 0, 0, 0, 0]
     
     model1 = epidemic_model(params1, initial_conditions)
     model1.simulate()
@@ -59,7 +64,7 @@ for (beta,nu_max) in zip(np.ravel(BETA),np.ravel(NU_MAX)):
     model2 = epidemic_model(params2, initial_conditions)
     model2.simulate()
     
-    if model1.reproduction_number > 1e2 and nu_max >= 0.0002:
+    if model1.reproduction_number >= 1e2 and nu_max >= 0.0:
         
         print(model2.delta_d, model1.delta_d)
         print(model2.D_tot, model1.D_tot)
@@ -105,6 +110,7 @@ for (beta,nu_max) in zip(np.ravel(BETA),np.ravel(NU_MAX)):
             pad_inches = 0)
         plt.show()
     
+    print(model2.delta_d)
     f_arr.append((model2.delta_d-model1.delta_d)/max(model1.delta_d,model2.delta_d))
     
     F_arr.append((model2.D_tot-model1.D_tot)/max(model1.D_tot,model2.D_tot))
@@ -128,7 +134,13 @@ print("F", F)
 f = f < 0
 F = F < 0
 
-cmap = colors.ListedColormap(['#b7241b','#265500'])
+f = np.ma.masked_where(f == False, f)
+F = np.ma.masked_where(F == False, F)
+
+# set color for which f,F < 0 is True
+cmap = colors.ListedColormap(['#b7241b'])
+# set color for which f,F > 0 is False
+cmap.set_bad(color='#265500')
 
 fig, ax = plt.subplots(ncols = 2)
 
