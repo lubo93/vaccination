@@ -32,13 +32,18 @@ rcParams.update({'figure.figsize': fig_size})
 # [beta, betap, betapp, beta_1, beta_1p, beta_1pp, \
 # beta_2, beta_2p, beta_2pp, nu_1, nu_2, eta_1, eta_2, \
 # gamma, gammap, gammapp, sigma, sigma_1, sigma_2, IFR, IFR1, IFR2]
-params = [0.2, 0.01, 0.001, 0.005, 0.001, 0.0001, 0.01, 0.001, 0.0001, \
-0.001, 0.001, 0.001, 0.001, 0.05, 0.1, 0.15, 0.01, 0.01, 0.01, 1e-2, 1e-3, 1e-4]
+params = [0.05, 0.01, 0.001, 0.005, 0.001, 0.0001, 0.01, 0.001, 0.0001, \
+0.0005, 0.001, 0.001, 0.001, 0.05, 0.1, 0.15, 0.01, 0.01, 0.01, \
+1e-2, 1e-3, 1e-4, 21]
 
 # [S0, S0p, S0pp, E0, E0p, E0pp, I0, I0p, I0pp, R0, D0]
-initial_conditions = [0.99, 0, 0, 0, 0, 0, 0.01, 0, 0, 0, 0]
+I0 = 1e-3
+initial_conditions = [1-I0, 0, 0, 0, 0, 0, I0, 0, 0, 0, 0]
 
-model = epidemic_model(params, initial_conditions)
+model = epidemic_model(params,
+                       initial_conditions,
+                       time_step = 1e-3,
+                       duration = 200)
 model.simulate()
 
 fig, ax = plt.subplots()
