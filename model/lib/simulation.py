@@ -6,7 +6,11 @@ class epidemic_model:
     A class to model SEIRD dynamics with prime and prime-boost vaccination.
 
     """
-    def __init__(self, params, initial_conditions):   
+    def __init__(self,
+                 params,
+                 initial_conditions,
+                 time_step,
+                 duration):   
         
         # rate parameters
         self.beta = params[0]
@@ -38,6 +42,8 @@ class epidemic_model:
         self.IFR = params[19] 
         self.IFRp = params[20] 
         self.IFRpp = params[21] 
+        
+        self.td = params[22]
         
         # initial conditions
         self.S0 = initial_conditions[0]
@@ -91,8 +97,9 @@ class epidemic_model:
         self.D_arr.append(self.D)
 
         # simulation parameters
-        self.dt = 1e-1
-        self.T = 300
+        self.dt = time_step
+        self.t = 0
+        self.T = duration
         self.N = int(self.T/self.dt)
         
         self.t_arr = np.linspace(0, self.T, self.N+1)
@@ -110,17 +117,20 @@ class epidemic_model:
         prime-boost vaccination.
         """
         
-        self.vaccine_total += self.dt*(self.nu_1*self.S+self.nu_2*self.Sp)        
+        self.vaccine_total += self.dt*(self.nu_1*np.heaviside(self.S-self.nu_1,0) \
+        +self.nu_2*np.heaviside(self.Sp-self.nu_2,0)*np.heaviside(self.t-self.td,0))        
                 
         delta_S = -self.beta*self.S*self.I -  \
         self.betap*self.S*self.Ip - self.betapp*self.S*self.Ipp - \
-        self.nu_1*np.heaviside(self.S,0) + self.eta_1*self.Sp + self.eta_2*self.Spp
+        self.nu_1*np.heaviside(self.S-self.nu_1,0) + self.eta_1*self.Sp + \
+        self.eta_2*self.Spp
         
-        delta_Sp = self.nu_1*np.heaviside(self.S,0) - self.beta_1*self.Sp*self.I -  \
+        delta_Sp = self.nu_1*np.heaviside(self.S-self.nu_1,0) - self.beta_1*self.Sp*self.I -  \
         self.beta_1p*self.Sp*self.Ip - self.beta_1pp*self.Sp*self.Ipp - \
-        self.nu_2*np.heaviside(self.Sp,0) -self.eta_1*self.Sp
+        self.nu_2*np.heaviside(self.Sp-self.nu_2,0)*np.heaviside(self.t-self.td,0) \
+        - self.eta_1*self.Sp
         
-        delta_Spp = self.nu_2*np.heaviside(self.Sp,0) - \
+        delta_Spp = self.nu_2*np.heaviside(self.Sp-self.nu_2,0)*np.heaviside(self.t-self.td,0) - \
         self.beta_2*self.Spp*self.I - self.beta_2p*self.Spp*self.Ip - \
         self.beta_2pp*self.Spp*self.Ipp - self.eta_2*self.Spp
         
@@ -196,6 +206,7 @@ class epidemic_model:
         
         for i in range(self.N):
             self.step()
+            self.t += self.dt
             self.S_arr.append(self.S)
             self.Sp_arr.append(self.Sp)
             self.Spp_arr.append(self.Spp)
