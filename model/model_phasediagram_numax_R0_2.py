@@ -31,7 +31,7 @@ rcParams.update({'figure.figsize': fig_size})
 ### prime/boost protocols
 # simulation parameters/initial conditions
 
-beta_arr = np.linspace(1/6, 0.3, 10)
+beta_arr = np.linspace(1/6, 0.666, 10)
 nu_max_arr = np.linspace(0, 1e-3, 10)
 
 f_arr = []
@@ -49,19 +49,26 @@ for (beta,nu_max) in zip(np.ravel(BETA),np.ravel(NU_MAX)):
     # gamma, gammap, gammapp, sigma, sigma_1, sigma_2, IFR, IFR1, IFR2]
     params1 = [beta, beta/10, beta/20, 0.8*beta, 0.8*beta/10, 0.8*beta/20, \
     0.1*beta, 0.1*beta/10, 0.1*beta/20, nu_max, 0, \
-    1e-3, 1e-3, 1/6, 1/3, 1/2, 1/5, 1/2, 1/2, 1e-2, 1e-3, 1e-4]
+    1e-3, 1e-3, 1/6, 1/3, 1/2, 1/5, 1/2, 1/2, 1e-2, 1e-3, 1e-4, 21]
     
     params2 = [beta, beta/10, beta/20, 0.8*beta, 0.8*beta/10, 0.8*beta/20, \
     0.1*beta, 0.1*beta/10, 0.1*beta/20, nu_max/2, nu_max/2, \
-    1e-3, 1e-3, 1/6, 1/3, 1/2, 1/5, 1/2, 1/2, 1e-2, 1e-3, 1e-4]
+    1e-3, 1e-3, 1/6, 1/3, 1/2, 1/5, 1/2, 1/2, 1e-2, 1e-3, 1e-4, 21]
     
     # [S0, S0p, S0pp, E0, E0p, E0pp, I0, I0p, I0pp, R0, D0]
-    initial_conditions = [0.99, 0, 0, 0, 0, 0, 0.01, 0, 0, 0, 0]
+    I0 = 1e-2
+    initial_conditions = [1-I0, 0, 0, 0, 0, 0, I0, 0, 0, 0, 0]
     
-    model1 = epidemic_model(params1, initial_conditions)
+    model1 = epidemic_model(params1, 
+                            initial_conditions,
+                            time_step = 1e-2,
+                            duration = 150)
     model1.simulate()
     
-    model2 = epidemic_model(params2, initial_conditions)
+    model2 = epidemic_model(params2, 
+                            initial_conditions,
+                            time_step = 1e-2,
+                            duration = 150)
     model2.simulate()
     
     if model1.reproduction_number > 1e2 and nu_max >= 0.0002:
@@ -143,13 +150,13 @@ cmap.set_bad(color='#265500')
 
 fig, ax = plt.subplots(ncols = 2)
 
-ax[0].set_title(r"$f=(d_2-d_1)/\mathrm{max}(d_1,d_2)$")
+ax[0].set_title(r"$\delta(d_1,d_2)=(d_2-d_1)/\mathrm{max}(d_1,d_2)$")
 cm1 = ax[0].pcolormesh(R_0, NU_MAX, f, cmap=cmap, alpha = 0.8, linewidth=0, antialiased=True)
 
 ax[0].set_xlabel(r"$R_0$")
 ax[0].set_ylabel(r"$\nu_{\mathrm{max}}$")
 
-ax[1].set_title(r"$F=(D_2-D_1)/\mathrm{max}(D_1,D_2)$")
+ax[1].set_title(r"$\Delta(D_1,D_2)=(D_2-D_1)/\mathrm{max}(D_1,D_2)$")
 cm2 = ax[1].pcolormesh(R_0, NU_MAX, F, cmap=cmap, alpha = 0.8, linewidth=0, antialiased=True)
 ax[1].set_xlabel(r"$R_0$")
 

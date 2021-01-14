@@ -39,7 +39,7 @@ F_arr = []
 
 BETA1dBETA, NU1dNU2 = np.meshgrid(beta1dbeta_arr,nu1dnu2_arr)
 
-beta = 3/14
+beta = 3/6
 nu = 5*1e-3
 
 for (pref,nu_pref) in zip(np.ravel(BETA1dBETA), np.ravel(NU1dNU2)):
@@ -48,24 +48,31 @@ for (pref,nu_pref) in zip(np.ravel(BETA1dBETA), np.ravel(NU1dNU2)):
     # [beta, betap, betapp, beta_1, beta_1p, beta_1pp, \
     # beta_2, beta_2p, beta_2pp, nu_1, nu_2, eta_1, eta_2, \
     # gamma, gammap, gammapp, sigma, sigma_1, sigma_2, IFR, IFR1, IFR2]
-    params1 = [beta, beta/10, beta/20, pref*beta, pref*beta/10, pref*beta/20, \
-    0.05*pref*beta, 0.05*pref*beta/10, 0.05*pref*beta/20, nu, 0, \
-    1e-3, 1e-3, 1/6, 1/6, 1/6, 1/5, 1/5, 1/5, 1e-2, 1e-2, 1e-2]
+    params1 = [beta, beta/10, beta/20, 0.8*beta, 0.8*beta/10, 0.8*beta/20, \
+    pref*0.8*beta, pref*0.8*beta/10, pref*0.8*beta/20, nu, 0, \
+    1e-3, 1e-3, 1/6, 1/3, 1/2, 1/5, 1/2, 1/2, 1e-2, 1e-3, 1e-4, 21]
     
-    params2 = [beta, beta/10, beta/20, pref*beta, pref*beta/10, pref*beta/20, \
-    0.05*pref*beta, 0.05*pref*beta/10, 0.05*pref*beta/20, nu*nu_pref, nu*(1-nu_pref), \
-    1e-3, 1e-3, 1/6, 1/6, 1/6, 1/5, 1/5, 1/5, 1e-2, 1e-2, 1e-2]
+    params2 = [beta, beta/10, beta/20, 0.8*beta, 0.8*beta/10, 0.8*beta/20, \
+    pref*0.8*beta, pref*0.8*beta/10, pref*0.8*beta/20, nu*nu_pref, nu*(1-nu_pref), \
+    1e-3, 1e-3, 1/6, 1/3, 1/2, 1/5, 1/2, 1/2, 1e-2, 1e-3, 1e-4, 21]
     
     # [S0, S0p, S0pp, E0, E0p, E0pp, I0, I0p, I0pp, R0, D0]
-    initial_conditions = [0.99, 0, 0, 0, 0, 0, 0.01, 0, 0, 0, 0]
+    I0 = 1e-2
+    initial_conditions = [1-I0, 0, 0, 0, 0, 0, I0, 0, 0, 0, 0]
     
-    model1 = epidemic_model(params1, initial_conditions)
+    model1 = epidemic_model(params1, 
+                            initial_conditions,
+                            time_step = 1e-2,
+                            duration = 150)
     model1.simulate()
     
-    model2 = epidemic_model(params2, initial_conditions)
+    model2 = epidemic_model(params2, 
+                            initial_conditions,
+                            time_step = 1e-2,
+                            duration = 150)
     model2.simulate()
     
-    if pref >= 1e2 and nu_pref >= 1:
+    if pref >= 1e2 and nu_pref/(1-nu_pref) >= 1e2:
         
         print(model2.delta_d, model1.delta_d)
         print(model2.D_tot, model1.D_tot)
@@ -138,14 +145,14 @@ cmap.set_bad(color='#265500')
 
 fig, ax = plt.subplots(ncols = 2)
 
-ax[0].set_title(r"$f=(d_2-d_1)/\mathrm{max}(d_1,d_2)$")
+ax[0].set_title(r"$\delta(d_1,d_2)=(d_2-d_1)/\mathrm{max}(d_1,d_2)$")
 cm1 = ax[0].pcolormesh(BETA1dBETA, NU1dNU2/(1-NU1dNU2), f, cmap=cmap, alpha = 0.8, linewidth=0, antialiased=True)
-ax[0].set_xlabel(r"$\beta_1/\beta$")
+ax[0].set_xlabel(r"$\beta_2/\beta_1$")
 ax[0].set_ylabel(r"$\nu_{1}/\nu_{2}$")
 
-ax[1].set_title(r"$F=(D_2-D_1)/\mathrm{max}(D_1,D_2)$")
+ax[1].set_title(r"$\Delta(D_1,D_2)=(D_2-D_1)/\mathrm{max}(D_1,D_2)$")
 cm2 = ax[1].pcolormesh(BETA1dBETA, NU1dNU2/(1-NU1dNU2), F, cmap=cmap, alpha = 0.8, linewidth=0, antialiased=True)
-ax[1].set_xlabel(r"$\beta_1/\beta$")
+ax[1].set_xlabel(r"$\beta_2/\beta_1$")
 
 #fig.colorbar(cm1, ax=ax[0])
 #fig.colorbar(cm2, ax=ax[1])
@@ -159,4 +166,4 @@ ax[1].set_yscale('log')
 ax[1].set_yticks([])
 
 plt.tight_layout()
-plt.savefig("nu1nu2_betabeta1_1.png", dpi = 300)
+plt.savefig("nu1nu2_beta1beta2_2.png", dpi = 300)
