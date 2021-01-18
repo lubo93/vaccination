@@ -11,7 +11,8 @@ class epidemic_model:
                  params,
                  initial_conditions,
                  time_step,
-                 duration):   
+                 duration,
+                 Euler = True):   
         
         # rate parameters
         self.beta = params[0]
@@ -105,6 +106,8 @@ class epidemic_model:
         
         self.t_arr = np.linspace(0, self.T, self.N+1)
         
+        self.Euler = Euler
+        
         # maximum change of deaths and total deaths
         self.delta_d = 0
         self.D_tot = 0          
@@ -118,20 +121,20 @@ class epidemic_model:
         prime-boost vaccination.
         """
         
-        self.vaccine_total += self.dt*(self.nu_1*np.heaviside(self.S-self.nu_1,0) \
-        +self.nu_2*np.heaviside(self.Sp-self.nu_2,0)*np.heaviside(self.t-self.td,0))        
+        self.vaccine_total += self.dt*(self.nu_1*np.heaviside(self.S,0) \
+        +self.nu_2*np.heaviside(self.Sp,0)*np.heaviside(self.t-self.td,0))        
                 
         delta_S = -self.beta*self.S*self.I -  \
         self.betap*self.S*self.Ip - self.betapp*self.S*self.Ipp - \
-        self.nu_1*np.heaviside(self.S-self.nu_1,0) + self.eta_1*self.Sp + \
+        self.nu_1*np.heaviside(self.S,0) + self.eta_1*self.Sp + \
         self.eta_2*self.Spp
         
-        delta_Sp = self.nu_1*np.heaviside(self.S-self.nu_1,0) - self.beta_1*self.Sp*self.I -  \
+        delta_Sp = self.nu_1*np.heaviside(self.S,0) - self.beta_1*self.Sp*self.I -  \
         self.beta_1p*self.Sp*self.Ip - self.beta_1pp*self.Sp*self.Ipp - \
-        self.nu_2*np.heaviside(self.Sp-self.nu_2,0)*np.heaviside(self.t-self.td,0) \
+        self.nu_2*np.heaviside(self.Sp,0)*np.heaviside(self.t-self.td,0) \
         - self.eta_1*self.Sp
         
-        delta_Spp = self.nu_2*np.heaviside(self.Sp-self.nu_2,0)*np.heaviside(self.t-self.td,0) - \
+        delta_Spp = self.nu_2*np.heaviside(self.Sp,0)*np.heaviside(self.t-self.td,0) - \
         self.beta_2*self.Spp*self.I - self.beta_2p*self.Spp*self.Ip - \
         self.beta_2pp*self.Spp*self.Ipp - self.eta_2*self.Spp
         
@@ -207,15 +210,15 @@ class epidemic_model:
                         
         delta_S = lambda y: -self.beta*y[0]*y[6] -  \
         self.betap*y[0]*y[7] - self.betapp*y[0]*y[8] - \
-        self.nu_1*np.heaviside(y[0]-self.nu_1,0) + self.eta_1*y[1] + \
+        self.nu_1*np.heaviside(y[0],0) + self.eta_1*y[1] + \
         self.eta_2*y[2]
         
-        delta_Sp = lambda y: self.nu_1*np.heaviside(y[0]-self.nu_1,0) - self.beta_1*y[1]*y[6] -  \
+        delta_Sp = lambda y: self.nu_1*np.heaviside(y[0],0) - self.beta_1*y[1]*y[6] -  \
         self.beta_1p*y[1]*y[7] - self.beta_1pp*y[1]*y[8] - \
-        self.nu_2*np.heaviside(y[1]-self.nu_2,0)*np.heaviside(self.t-self.td,0) \
+        self.nu_2*np.heaviside(y[1],0)*np.heaviside(self.t-self.td,0) \
         - self.eta_1*y[1]
         
-        delta_Spp = lambda y: self.nu_2*np.heaviside(y[1]-self.nu_2,0)*np.heaviside(self.t-self.td,0) - \
+        delta_Spp = lambda y: self.nu_2*np.heaviside(y[1],0)*np.heaviside(self.t-self.td,0) - \
         self.beta_2*y[2]*y[6] - self.beta_2p*y[2]*y[7] - \
         self.beta_2pp*y[2]*y[8] - self.eta_2*y[2]
         
@@ -243,8 +246,8 @@ class epidemic_model:
         self.gammap*self.IFRp*y[7] + \
         self.gammapp*self.IFRpp*y[8]
         
-        delta_vaccine = lambda y: self.nu_1*np.heaviside(y[0]-self.nu_1,0) \
-        +self.nu_2*np.heaviside(y[1]-self.nu_2,0)*np.heaviside(self.t-self.td,0)        
+        delta_vaccine = lambda y: self.nu_1*np.heaviside(y[0],0) \
+        +self.nu_2*np.heaviside(y[1],0)*np.heaviside(self.t-self.td,0)        
 
         
         f = lambda t, y: [delta_S(y), delta_Sp(y), delta_Spp(y), 
@@ -288,7 +291,12 @@ class epidemic_model:
         """
         
         for i in range(self.N):
-            self.step_DOPRI()
+            
+            if self.Euler == True:
+                self.step_EULER()
+            else:
+                self.step_DOPRI()
+                
             self.t += self.dt
             self.S_arr.append(self.S)
             self.Sp_arr.append(self.Sp)
