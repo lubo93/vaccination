@@ -33,19 +33,18 @@ rcParams.update({'figure.figsize': fig_size})
 # simulation parameters/initial conditions
 
 beta_arr = np.linspace(1/14, 4/14, 30)
-eta2 = 3e-3
-eta1eta2_arr = np.linspace(-eta2,1e-1, 30)
+I0_arr = np.linspace(1e-4,1e-1, 30)
 
 f_arr = []
 F_arr = []
 
 R_0_arr = []
 
-BETA, ETA1ETA2 = np.meshgrid(beta_arr,eta1eta2_arr)
+BETA, I0_ARR = np.meshgrid(beta_arr,I0_arr)
 
 nu = 1e-3
 
-for (beta,eta_diff) in zip(np.ravel(BETA),np.ravel(ETA1ETA2)):
+for (beta,I0) in zip(np.ravel(BETA),np.ravel(I0_ARR)):
         
     # simulation parameters/initial conditions
     # [beta, betap, betapp, beta_1, beta_1p, beta_1pp, \
@@ -53,14 +52,13 @@ for (beta,eta_diff) in zip(np.ravel(BETA),np.ravel(ETA1ETA2)):
     # gamma, gammap, gammapp, sigma, sigma_1, sigma_2, IFR, IFR1, IFR2, td]
     params1 = [beta, beta/10, beta/20, beta/2, beta/10/2, beta/20/2, \
     beta/10, beta/10/10, beta/20/10, nu, 0, \
-    eta_diff+eta2, eta2, 1/14, 2/14, 4/14, 1/5, 1/5, 1/5, 1e-2, 1e-3, 1e-3, 21]
+    1e-2, 3e-3, 1/14, 2/14, 4/14, 1/5, 1/5, 1/5, 1e-2, 1e-3, 1e-3, 21]
     
     params2 = [beta, beta/10, beta/20, beta/2, beta/10/2, beta/20/2, \
     beta/10, beta/10/10, beta/20/10, nu/2, nu/2, \
-    eta_diff+eta2, eta2, 1/14, 2/14, 4/14, 1/5, 1/5, 1/5, 1e-2, 1e-3, 1e-3, 21]
+    1e-2, 3e-3, 1/14, 2/14, 4/14, 1/5, 1/5, 1/5, 1e-2, 1e-3, 1e-3, 21]
     
     # [S0, S0p, S0pp, E0, E0p, E0pp, I0, I0p, I0pp, R0, D0]
-    I0 = 1e-2
     initial_conditions = [1-I0, 0, 0, 0, 0, 0, I0, 0, 0, 0, 0]
     
     model1 = epidemic_model(params1, 
@@ -158,15 +156,16 @@ cmap=LinearSegmentedColormap.from_list("", ["#b7241b", "w", "#265500"], N=128)
 fig, ax = plt.subplots(ncols = 2)
 
 ax[0].set_title(r"$\delta(d_1,d_2)=(d_2-d_1)/\mathrm{max}(d_1,d_2)$")
-cm1 = ax[0].pcolormesh(R_0, ETA1ETA2, f, cmap=cmap, alpha = 1, linewidth=0, \
+cm1 = ax[0].pcolormesh(R_0, I0_ARR, f, cmap=cmap, alpha = 1, linewidth=0, \
 antialiased=True, vmin = -0.2, vmax = 0.2)
 
 ax[0].set_xlabel(r"$R_0$")
-ax[0].set_ylabel(r"$\eta_1-\eta_2$")
+ax[0].set_ylabel(r"$I(0)$")
 
 ax[1].set_title(r"$\Delta(D_1,D_2)=(D_2-D_1)/\mathrm{max}(D_1,D_2)$")
-cm2 = ax[1].pcolormesh(R_0, ETA1ETA2, F, cmap=cmap, alpha = 1, linewidth=0, \
+cm2 = ax[1].pcolormesh(R_0, I0_ARR, F, cmap=cmap, alpha = 1, linewidth=0,  \
 antialiased=True, vmin = -0.2, vmax = 0.2)
+
 ax[1].set_xlabel(r"$R_0$")
 
 #fig.colorbar(cm1, ax=ax[0])
@@ -181,4 +180,4 @@ ax[1].set_ylim([0,0.1])
 ax[1].set_yticks([])
 
 plt.tight_layout()
-plt.savefig("eta1eta2_R0_1.png", dpi = 300)
+plt.savefig("I0_R0_1.png", dpi = 300)

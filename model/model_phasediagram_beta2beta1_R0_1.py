@@ -33,31 +33,31 @@ rcParams.update({'figure.figsize': fig_size})
 # simulation parameters/initial conditions
 
 beta_arr = np.linspace(1/14, 4/14, 30)
-eta2 = 3e-3
-eta1eta2_arr = np.linspace(-eta2,1e-1, 30)
+beta2beta1_arr = np.linspace(1e-4, 1, 30)
 
 f_arr = []
 F_arr = []
 
 R_0_arr = []
 
-BETA, ETA1ETA2 = np.meshgrid(beta_arr,eta1eta2_arr)
+BETA, BETA2BETA1 = np.meshgrid(beta_arr,beta2beta1_arr)
 
-nu = 1e-3
+nu_max = 1e-3
 
-for (beta,eta_diff) in zip(np.ravel(BETA),np.ravel(ETA1ETA2)):
-        
+for (beta,beta2beta1) in zip(np.ravel(BETA),np.ravel(BETA2BETA1)):
+    
+    beta1 = beta/2
     # simulation parameters/initial conditions
     # [beta, betap, betapp, beta_1, beta_1p, beta_1pp, \
     # beta_2, beta_2p, beta_2pp, nu_1, nu_2, eta_1, eta_2, \
     # gamma, gammap, gammapp, sigma, sigma_1, sigma_2, IFR, IFR1, IFR2, td]
-    params1 = [beta, beta/10, beta/20, beta/2, beta/10/2, beta/20/2, \
-    beta/10, beta/10/10, beta/20/10, nu, 0, \
-    eta_diff+eta2, eta2, 1/14, 2/14, 4/14, 1/5, 1/5, 1/5, 1e-2, 1e-3, 1e-3, 21]
+    params1 = [beta, beta/10, beta/20, beta1, beta1/10, beta1/20, \
+    beta2beta1*beta1, beta2beta1*beta1/10, beta2beta1*beta1/20, nu_max, 0, \
+    1e-2, 3e-3, 1/14, 2/14, 4/14, 1/5, 1/5, 1/5, 1e-2, 1e-3, 1e-3, 21]
     
-    params2 = [beta, beta/10, beta/20, beta/2, beta/10/2, beta/20/2, \
-    beta/10, beta/10/10, beta/20/10, nu/2, nu/2, \
-    eta_diff+eta2, eta2, 1/14, 2/14, 4/14, 1/5, 1/5, 1/5, 1e-2, 1e-3, 1e-3, 21]
+    params2 = [beta, beta/10, beta/20, beta1, beta1/10, beta1/20, \
+    beta2beta1*beta1, beta2beta1*beta1/10, beta2beta1*beta1/20, nu_max/2, nu_max/2, \
+    1e-2, 3e-3, 1/14, 2/14, 4/14, 1/5, 1/5, 1/5, 1e-2, 1e-3, 1e-3, 21]
     
     # [S0, S0p, S0pp, E0, E0p, E0pp, I0, I0p, I0pp, R0, D0]
     I0 = 1e-2
@@ -75,7 +75,7 @@ for (beta,eta_diff) in zip(np.ravel(BETA),np.ravel(ETA1ETA2)):
                             duration = 300)
     model2.simulate()
     
-    if model1.reproduction_number >= 1e2 and eta_diff >= 1e2:
+    if model1.reproduction_number >= 1e2 and nu_max >= 1e2:
         
         print(model2.delta_d, model1.delta_d)
         print(model2.D_tot, model1.D_tot)
@@ -158,14 +158,14 @@ cmap=LinearSegmentedColormap.from_list("", ["#b7241b", "w", "#265500"], N=128)
 fig, ax = plt.subplots(ncols = 2)
 
 ax[0].set_title(r"$\delta(d_1,d_2)=(d_2-d_1)/\mathrm{max}(d_1,d_2)$")
-cm1 = ax[0].pcolormesh(R_0, ETA1ETA2, f, cmap=cmap, alpha = 1, linewidth=0, \
+cm1 = ax[0].pcolormesh(R_0, BETA2BETA1, f, cmap=cmap, alpha = 1, linewidth=0,  \
 antialiased=True, vmin = -0.2, vmax = 0.2)
 
 ax[0].set_xlabel(r"$R_0$")
-ax[0].set_ylabel(r"$\eta_1-\eta_2$")
+ax[0].set_ylabel(r"$\beta_2/\beta_1$")
 
 ax[1].set_title(r"$\Delta(D_1,D_2)=(D_2-D_1)/\mathrm{max}(D_1,D_2)$")
-cm2 = ax[1].pcolormesh(R_0, ETA1ETA2, F, cmap=cmap, alpha = 1, linewidth=0, \
+cm2 = ax[1].pcolormesh(R_0, BETA2BETA1, F, cmap=cmap, alpha = 1, linewidth=0,  \
 antialiased=True, vmin = -0.2, vmax = 0.2)
 ax[1].set_xlabel(r"$R_0$")
 
@@ -176,9 +176,9 @@ ax[0].set_xlim([1,4])
 ax[1].set_xlim([1,4])
 ax[0].set_xticks([1,2,3,4])
 ax[1].set_xticks([1,2,3,4])
-ax[0].set_ylim([0,0.1])
-ax[1].set_ylim([0,0.1])
+ax[0].set_ylim([0,1])
+ax[1].set_ylim([0,1])
 ax[1].set_yticks([])
 
 plt.tight_layout()
-plt.savefig("eta1eta2_R0_1.png", dpi = 300)
+plt.savefig("beta2beta1_R0_1.png", dpi = 300)
