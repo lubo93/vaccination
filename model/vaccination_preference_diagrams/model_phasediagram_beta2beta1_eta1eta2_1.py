@@ -1,3 +1,6 @@
+import matplotlib
+matplotlib.use('Agg')
+
 import numpy as np
 import matplotlib.pyplot as plt
 from lib.simulation import epidemic_model
@@ -32,7 +35,8 @@ rcParams.update({'figure.figsize': fig_size})
 ### prime/boost protocols
 # simulation parameters/initial conditions
 
-nu_max_arr = np.linspace(0, 1e-1, 30)
+eta2 = 3e-3
+eta1eta2_arr = np.linspace(-eta2,1e-1, 30)
 beta2beta1_arr = np.linspace(1e-4, 1, 30)
 
 f_arr = []
@@ -40,11 +44,12 @@ F_arr = []
 
 R_0_arr = []
 
-NU_MAX, BETA2BETA1 = np.meshgrid(nu_max_arr,beta2beta1_arr)
+ETA1ETA2, BETA2BETA1 = np.meshgrid(eta1eta2_arr,beta2beta1_arr)
 
 beta = 3/14
+nu_max = 1e-3
 
-for (nu_max,beta2beta1) in zip(np.ravel(NU_MAX),np.ravel(BETA2BETA1)):
+for (eta_diff,beta2beta1) in zip(np.ravel(ETA1ETA2),np.ravel(BETA2BETA1)):
     
     beta1 = beta/2
     # simulation parameters/initial conditions
@@ -53,11 +58,11 @@ for (nu_max,beta2beta1) in zip(np.ravel(NU_MAX),np.ravel(BETA2BETA1)):
     # gamma, gammap, gammapp, sigma, sigma_1, sigma_2, IFR, IFR1, IFR2, td]
     params1 = [beta, beta/10, beta/20, beta1, beta1/10, beta1/20, \
     beta2beta1*beta1, beta2beta1*beta1/10, beta2beta1*beta1/20, nu_max, 0, \
-    1e-2, 3e-3, 1/14, 2/14, 4/14, 1/5, 1/5, 1/5, 1e-2, 1e-3, 1e-3, 21]
+    eta_diff+eta2, eta2, 1/14, 2/14, 4/14, 1/5, 1/5, 1/5, 1e-2, 1e-3, 1e-3, 21]
     
     params2 = [beta, beta/10, beta/20, beta1, beta1/10, beta1/20, \
     beta2beta1*beta1, beta2beta1*beta1/10, beta2beta1*beta1/20, nu_max/2, nu_max/2, \
-    1e-2, 3e-3, 1/14, 2/14, 4/14, 1/5, 1/5, 1/5, 1e-2, 1e-3, 1e-3, 21]
+    eta_diff+eta2, eta2, 1/14, 2/14, 4/14, 1/5, 1/5, 1/5, 1e-2, 1e-3, 1e-3, 21]
     
     # [S0, S0p, S0pp, E0, E0p, E0pp, I0, I0p, I0pp, R0, D0]
     I0 = 1e-2
@@ -66,13 +71,15 @@ for (nu_max,beta2beta1) in zip(np.ravel(NU_MAX),np.ravel(BETA2BETA1)):
     model1 = epidemic_model(params1, 
                             initial_conditions,
                             time_step = 1e-1,
-                            duration = 300)
+                            duration = 300,
+                            Euler = False)
     model1.simulate()
     
     model2 = epidemic_model(params2, 
                             initial_conditions,
                             time_step = 1e-1,
-                            duration = 300)
+                            duration = 300,
+                            Euler = False)
     model2.simulate()
     
     if model1.reproduction_number >= 1e2 and nu_max >= 1e2:
@@ -132,11 +139,11 @@ f_arr = np.asarray(f_arr)
 F_arr = np.asarray(F_arr)
 R_0_arr = np.asarray(R_0_arr)
 
-R_0 = R_0_arr.reshape(NU_MAX.shape)   
+R_0 = R_0_arr.reshape(ETA1ETA2.shape)   
 
-f = f_arr.reshape(NU_MAX.shape)    
+f = f_arr.reshape(ETA1ETA2.shape)    
 
-F = F_arr.reshape(NU_MAX.shape)    
+F = F_arr.reshape(ETA1ETA2.shape)    
 
 print("f", f)
 
@@ -155,22 +162,22 @@ cmap=LinearSegmentedColormap.from_list("", ["#b7241b", "w", "#265500"], N=128)
 # set color for which f,F > 0 is False
 # cmap.set_bad(color='#265500')
 
-fig, ax = plt.subplots(ncols = 2)
+fig, ax = plt.subplots(ncols = 2, constrained_layout = "True")
 
 ax[0].set_title(r"$\delta(d_1,d_2)=(d_2-d_1)/\mathrm{max}(d_1,d_2)$")
-cm1 = ax[0].pcolormesh(NU_MAX, BETA2BETA1, f, cmap=cmap, alpha = 1, linewidth=0,  \
-antialiased=True, vmin = -0.8, vmax = 0.8)
+cm1 = ax[0].pcolormesh(ETA1ETA2, BETA2BETA1, f, cmap=cmap, alpha = 1, linewidth=0,  \
+antialiased=True, vmin = -0.1, vmax = 0.1)
+ax[0].axvline(x=0.017, ymin=0, ymax=1, ls="--", color="k")
 
-ax[0].set_xlabel(r"$\nu_{\mathrm{max}}$")
+ax[0].set_xlabel(r"$\eta_1-\eta_2$")
 ax[0].set_ylabel(r"$\beta_2/\beta_1$")
 
 ax[1].set_title(r"$\Delta(D_1,D_2)=(D_2-D_1)/\mathrm{max}(D_1,D_2)$")
-cm2 = ax[1].pcolormesh(NU_MAX, BETA2BETA1, F, cmap=cmap, alpha = 1, linewidth=0,  \
-antialiased=True, vmin = -0.8, vmax = 0.8)
-ax[1].set_xlabel(r"$\nu_{\mathrm{max}}$")
+cm2 = ax[1].pcolormesh(ETA1ETA2, BETA2BETA1, F, cmap=cmap, alpha = 1, linewidth=0,  \
+antialiased=True, vmin = -0.1, vmax = 0.1)
+ax[1].axvline(x=0.017, ymin=0, ymax=1, ls="--", color="k")
 
-#fig.colorbar(cm1, ax=ax[0])
-#fig.colorbar(cm2, ax=ax[1])
+ax[1].set_xlabel(r"$\eta_1-\eta_2$")
 
 ax[0].set_xlim([0,0.1])
 ax[1].set_xlim([0,0.1])
@@ -178,5 +185,7 @@ ax[0].set_ylim([0,1])
 ax[1].set_ylim([0,1])
 ax[1].set_yticks([])
 
-plt.tight_layout()
-plt.savefig("beta2beta1_numax_1.png", dpi = 300)
+#fig.colorbar(cm1, ax=ax[0])
+plt.colorbar(cm2, ax=ax[1], shrink=0.9, ticks=[-0.1, -0.05, 0, 0.05, 0.1])
+
+plt.savefig("beta2beta1_eta1eta2_1.png", dpi = 300)
