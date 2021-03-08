@@ -6,11 +6,9 @@ Many countries, especially low and middle income countries, are facing limited v
 
 The majority of available vaccines require two immunization shots to provide maximum protection. Yet, the immunological response to the first (''prime'') injection may already  provide a substantial degree of protection against infection. Thus, it may be more effective to vaccinate as many people as possible with only one shot, instead of administering a person a second (''boost'') shot. Such a strategic vaccination campaign may help to more effectively slow down the spread of SARS-CoV-2, thereby reducing fatalities and the risk of collapsing health care systems.
 
-Yet, the conditions which make single-dose vaccination favourable over prime-boost administrations are not well understood.
+To help explore the conditions which make single-dose vaccination favourable over prime-boost administrations, we combine epidemiological modeling, random sampling techniques, and decision tree learning.
 
-In this project, we combine epidemiological modeling, random sampling techniques, and decision tree learning to explore decisive conditions for strategic vaccination against SARS-CoV-2 as a function of the various time scales and epidemiological mechanisms at work.
-
-Please run the files in ``excess_deaths`` to compute different mortality measures and analyze COVID-19 mortality data for different jurisdictions. (Make sure that you download the most recent source data, see below.) The coefficient of variation (CV) of the infection fatality ratio (IFR) can be directly calculated via ``IFR_CV.py``.
+A schematic of prime-first and prime-boost vaccination campaigns and our SEIR model extension is shown below. Panels (a,b) show the evolution of the number of prime and prime-boost vaccianted individuals. Model compartments and transitions are shown in panel (c).
 
 ![Image](illustration_final.png)
 
