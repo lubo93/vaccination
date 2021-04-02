@@ -117,7 +117,7 @@ class epidemic_model:
     
     def step_EULER(self):
         """
-        Euler forward integration step of SEIRD dynamics with prime and
+        Euler forward integration of SEIRD dynamics with prime and
         prime-boost vaccination.
         """
         
