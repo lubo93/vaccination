@@ -2,9 +2,9 @@
 
 ## Project Description
 
-Many countries, especially low and middle income countries, are facing limited vaccination supply and fearing the increasingly wide-spread emergence of SARS-CoV-2 virus mutants.
+Many countries, especially low and middle income countries, are facing limited vaccination supply and fearing more contagious and deadly SARS-CoV-2 virus mutants.
 
-The majority of available vaccines require two immunization doses to provide maximum protection. Yet, the immunological response to the first (''prime'') dose may already provide a substantial degree of protection against infection and severe disease. Thus, it may be more epidemiologically more effective to vaccinate as many people as possible with only one dose, instead of administering a person a second (''booster'') dose. Such a strategic vaccination campaign may help to more effectively slow down the spread of SARS-CoV-2, thereby reducing fatalities and the risk of collapsing health care systems.
+The majority of available vaccines require two immunization doses to provide maximum protection. Yet, the immunological response to the first (''prime'') dose may already provide a substantial degree of protection against infection and severe disease. Thus, it may be epidemiologically more effective to vaccinate as many people as possible with one dose, instead of administering a person a second (''booster'') dose. Such a strategic vaccination campaign may help to more effectively slow down the spread of SARS-CoV-2, thereby reducing fatalities and the risk of collapsing health care systems.
 
 To study the conditions which make prime-first vaccination favourable over prime-boost protocols, we combine epidemiological modeling, random sampling techniques, and decision tree learning.
 
