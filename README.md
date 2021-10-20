@@ -1,4 +1,4 @@
-# vaccination
+# COVID-19 Vaccination Strategies
 
 ## Project Description
 
